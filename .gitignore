@@ -1,3 +1,4 @@
-Zapier.js
-Zap.js
 .DS_Store
+build/*
+src/DS_Store
+
