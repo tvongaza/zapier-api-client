@@ -1,6 +1,5 @@
 Zap.create_matter_pre_write = (bundle) ->
     outbound = JSON.parse(bundle.request.data)
-    
     #
     #        Default values for matter. 
     #        Helps eliminate Undefined variables.
@@ -12,8 +11,6 @@ Zap.create_matter_pre_write = (bundle) ->
         value: null
         custom_field:
           id: null
-
-    
     #
     #        Only send custom_field_values entries to the Clio API if there exists a custom field id 
     #        anda value for the custom field. If not return an empty array. Helps eliminate searches
@@ -28,13 +25,7 @@ Zap.create_matter_pre_write = (bundle) ->
 
         value: outbound.matter.custom_field_values.value
       ]
-    
     #Set matter status open (wouldn't make sense to create a closed matter).
     outbound.matter.status = "Open"
     bundle.request.data = JSON.stringify(outbound)
-    url: bundle.request.url
-    method: bundle.request.method
-    auth: bundle.request.auth
-    headers: bundle.request.headers
-    params: bundle.request.params
-    data: bundle.request.data
+    bundle.request

@@ -18,19 +18,11 @@ Zap.create_relationship_pre_write = (bundle) ->
     )
     contact_response = Zap.make_post_request(bundle, "https://app.goclio.com/api/v2/contacts", contact_data)
     contact_id = contact_response.contact.id
-  
   outbound = relationship:
     description: outbound.relationship.description
     matter:
       id: outbound.relationship.matter.id
     contact:
       id: contact_id
-
   bundle.request.data = JSON.stringify(outbound)
-  
-  url: bundle.request.url
-  method: bundle.request.method
-  auth: bundle.request.auth
-  headers: bundle.request.headers
-  params: bundle.request.params
-  data: bundle.request.data
+  bundle.request

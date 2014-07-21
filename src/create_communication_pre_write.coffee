@@ -4,10 +4,8 @@ Zap.create_communication_pre_write = (bundle) ->
     sender_id = null
     receiver_type = undefined
     receiver_id = null
-    
     # Search for existing User with email_receiver
     user_response = Zap.make_get_request(bundle, "https://app.goclio.com/api/v2/users?query=" + outbound.communication.email_receiver)
-    
     #
     #        If the returned User search is successful,
     #        then update the receiver_id and receiver_type with 
@@ -16,10 +14,8 @@ Zap.create_communication_pre_write = (bundle) ->
     if user_response.users.length > 0
       receiver_id = user_response.users[0].id
       receiver_type = "User"
-    
     # Search for existing Contact with email_receiver
     contact_response = Zap.make_get_request(bundle, "https://app.goclio.com/api/v2/contacts?query=" + outbound.communication.email_receiver)
-    
     #
     #         If the returned Contact search is successful,
     #         then update the receiver_id and receiver_type with 
@@ -28,7 +24,6 @@ Zap.create_communication_pre_write = (bundle) ->
     if contact_response.contacts.length > 0
       receiver_id = contact_response.contacts[0].id
       receiver_type = "Contact"
-    
     #
     #    If the email of the Communication's receiver isn't recognised as
     #    an existing User or Contact then a Contact is created using the 
@@ -49,10 +44,8 @@ Zap.create_communication_pre_write = (bundle) ->
       contact_response = Zap.make_post_request(bundle, "https://app.goclio.com/api/v2/contacts", receiver_data)
       receiver_id = contact_response.contact.id
       receiver_type = "Contact"
-    
     # Search Users for existence of sender_id
     user_response = Zap.make_get_request(bundle, "https://app.goclio.com/api/v2/users?query=" + outbound.communication.email_sender)
-    
     #
     #        If the returned User search is successful,
     #        then update the sender_id and sender_type with 
@@ -61,10 +54,8 @@ Zap.create_communication_pre_write = (bundle) ->
     if user_response.users.length > 0
       sender_id = user_response.users[0].id
       sender_type = "User"
-    
     # Search Contacts for existence of email_sender
     contact_response = Zap.make_get_request(bundle, "https://app.goclio.com/api/v2/contacts?query=" + outbound.communication.email_sender)
-    
     #
     #        If the returned Contact search is successful,
     #        then update the sender_id and sender_type with 
@@ -73,7 +64,6 @@ Zap.create_communication_pre_write = (bundle) ->
     if contact_response.contacts.length > 0
       sender_id = contact_response.contacts[0].id
       sender_type = "Contact"
-    
     #
     #        If the email of the Communication's sender isn't recognised as
     #        an existing User or Contact then a Contact is created and the
@@ -93,7 +83,6 @@ Zap.create_communication_pre_write = (bundle) ->
       contact_response = Zap.make_post_request(bundle, "https://app.goclio.com/api/v2/contacts", sender_data)
       sender_id = contact_response.contact.id
       sender_type = "Contact"
-    
     #
     #        Default values for outbound.communication. 
     #        Stops undefined variable references. 
@@ -103,8 +92,6 @@ Zap.create_communication_pre_write = (bundle) ->
       body: null
       matter:
         id: null
-
-    
     #
     #        Reformat outbound data to be appropriate for 
     #        the Clio API Communications' data structure.
@@ -115,7 +102,6 @@ Zap.create_communication_pre_write = (bundle) ->
       body: outbound.communication.body
       matter:
         id: outbound.communication.matter.id
-
       senders: [
         id: sender_id
         type: sender_type
@@ -124,11 +110,5 @@ Zap.create_communication_pre_write = (bundle) ->
         id: receiver_id
         type: receiver_type
       ]
-
     bundle.request.data = JSON.stringify(outbound)
-    url: bundle.request.url
-    method: bundle.request.method
-    auth: bundle.request.auth
-    headers: bundle.request.headers
-    params: bundle.request.params
-    data: bundle.request.data
+    bundle.request
