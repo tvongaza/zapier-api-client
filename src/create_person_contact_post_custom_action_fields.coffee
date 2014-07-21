@@ -1,7 +1,6 @@
 Zap.create_person_contact_post_custom_action_fields = (bundle) ->
     result = JSON.parse(bundle.response.content)
     type = undefined
-    
     # match Clio custom field with Zapier custom field
     switch result.custom_field.field_type
       when "checkbox"
