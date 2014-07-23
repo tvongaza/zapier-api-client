@@ -1,7 +1,12 @@
- Zap.new_contact_post_poll = (bundle) ->
-     results = JSON.parse(bundle.response.content)
-     array = []
-     for field in results.contacts
+Zap.new_contact_post_poll = (bundle) ->
+  results = JSON.parse(bundle.response.content)
+  next_offset = results.next_offset
+  records = results.records
+  limit = results.limit
+  array =[]
+	 while limit is records
+		 #set defaults for attributes
+		 for field in results.contacts
       if results.contacts.length < 1
         field.first_name = null
         field.last_name = null
@@ -59,5 +64,14 @@
          web_site: field.web_sites[0].address
          matter: field.custom_field_values[0].matter.name
          custom_field_name: field.custom_field_values[0].custom_field.name
-     #reverse contact array for reverse-chronological order
-     array.reverse()
+  		#get next page of results, limit currently set at 2 for testing 
+ 		  results = Zap.make_get_request(bundle,"https://app.goclio.com/api/v2/contacts?limit=2&order_dir=desc&offset="+next_offset)
+  		next_offset = results.next_offset
+  		records = results.records
+  		limit = results.limit
+	 #return array of contacts
+	 array
+	
+	
+		
+	
