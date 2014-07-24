@@ -84,6 +84,18 @@ Zap.create_communication_pre_write = (bundle) ->
       sender_id = contact_response.contact.id
       sender_type = "Contact"
     #
+		#        If receiver_type or(exclusive or) sender_type are contact  
+		#        check the contact_id against matters for a matter_id 
+		#
+		if receiver_type or sender_type is "Contact" and receiver_type isnt sender_type
+			if sender_type is "Contact"
+				matter_id = 
+		  
+		
+		
+		
+		
+		#
     #        Default values for outbound.communication. 
     #        Stops undefined variable references. 
     #        
