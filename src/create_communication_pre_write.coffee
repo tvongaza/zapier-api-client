@@ -4,7 +4,6 @@ Zap.create_communication_pre_write = (bundle) ->
   sender_id = null
   receiver_type = undefined
   receiver_id = null
-  _.defaults matter_id,matters:[id:null]
   # Search for existing User with email_receiver
   user_response = Zap.make_get_request(bundle, "https://app.goclio.com/api/v2/users?query=" + outbound.communication.email_receiver)
   #
@@ -89,9 +88,11 @@ Zap.create_communication_pre_write = (bundle) ->
   #        check the contact_id against matters for a matter_id 
   #
   if sender_type is "Contact"
-	  matter_id = Zap.make_get_request(bundle,"https://app.goclio.com/api/v2/matters?client_id="+sender_id)
+	  matter_id = Zap.make_get_request(bundle,"https://app.goclio.com/api/v2/matters?status=Open&client_id="+sender_id)
+  	_.defaults matter_id.matters,[id:null]
   else if receiver_type is "Contact"
-	  matter_id = Zap.make_get_request(bundle,"https://app.goclio.com/api/v2/matters?client_id="+receiver_id)
+	  matter_id = Zap.make_get_request(bundle,"https://app.goclio.com/api/v2/matters?status=Open&client_id="+receiver_id)
+  	_.defaults matter_id.matters,[id:null]
   #
   #        Default values for outbound.communication. 
   #        Stops undefined variable references. 
