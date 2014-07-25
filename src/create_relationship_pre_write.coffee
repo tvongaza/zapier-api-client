@@ -26,4 +26,3 @@ Zap.create_relationship_pre_write = (bundle) ->
       id: contact_id
   bundle.request.data = JSON.stringify(outbound)
   bundle.request
-  

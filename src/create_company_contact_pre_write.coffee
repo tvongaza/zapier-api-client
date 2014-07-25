@@ -89,7 +89,6 @@ Zap.create_company_contact_pre_write = (bundle) ->
         user: null
         rate: null
         flat_rate: null
-
       if (outbound.contact.activity_rates.user is null) or (outbound.contact.activity_rates.rate is null) or (outbound.activity_rates.flat_rate is null)
         outbound.contact.activity_rates = []
       else

@@ -102,7 +102,6 @@ Zap.create_communication_pre_write = (bundle) ->
       body: outbound.communication.body
       matter:
         id: outbound.communication.matter.id
-
       senders: [
         id: sender_id
         type: sender_type

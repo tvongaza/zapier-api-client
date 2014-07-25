@@ -1,6 +1,6 @@
  Zap.create_calendar_entry_pre_write = (bundle) ->
     outbound = JSON.parse(bundle.request.data)
-  # Set default values for non-required fields, stops Undefined exceptions.
+    # Set default values for non-required fields, stops Undefined exceptions.
     _.defaults outbound.calendar_entry,
       description: null
       location: null
