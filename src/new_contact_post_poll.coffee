@@ -65,7 +65,7 @@ Zap.new_contact_post_poll = (bundle) ->
          matter: field.custom_field_values[0].matter.name
          custom_field_name: field.custom_field_values[0].custom_field.name
   		#get next page of results, limit currently set at 2 for testing 
- 		  results = Zap.make_get_request(bundle,"https://app.goclio.com/api/v2/contacts?limit=2&order_dir=desc&offset="+next_offset)
+ 		  results = Zap.make_get_request(bundle,"https://app.goclio.com/api/v2/contacts?limit=1000&order_dir=desc&offset="+next_offset)
   		next_offset = results.next_offset
   		records = results.records
   		limit = results.limit
