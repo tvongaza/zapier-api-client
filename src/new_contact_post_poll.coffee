@@ -4,7 +4,7 @@ Zap.new_contact_post_poll = (bundle) ->
   records = results.records
   limit = results.limit
   array =[]
-	 while limit is records
+	 while records isnt 0
 		 #set defaults for attributes
 		 for field in results.contacts
       if results.contacts.length < 1
