@@ -28,9 +28,9 @@ Zap.create_communication_pre_write = (bundle) ->
   #    If the email of the Communication's receiver isn't recognised as
   #    an existing User or Contact then a Contact is created using the 
   #    email and name of the receiverand the Communication's receiver 
-  #    will be associated with it.
+  #    will be associated with it.(only if new_contact is true)
   #    
-  if receiver_id is null
+  if receiver_id is null and outbound.communication.new_contact is true
     receiver_data = JSON.stringify(contact:
       type: "Person"
       name: outbound.communication.receiver_name
@@ -67,9 +67,9 @@ Zap.create_communication_pre_write = (bundle) ->
   #
   #        If the email of the Communication's sender isn't recognised as
   #        an existing User or Contact then a Contact is created and the
-  #        Communication's sender will be associated with it.
+  #        Communication's sender will be associated with it.(only if new_contact is true)
   #        
-  if sender_id is null
+  if sender_id is null and outbound.communication.new_contact is true
     sender_data = JSON.stringify(contact:
       type: "Person"
       name: outbound.communication.sender_name
@@ -84,41 +84,50 @@ Zap.create_communication_pre_write = (bundle) ->
     sender_id = contact_response.contact.id
     sender_type = "Contact"
   #
-  #        If receiver_type or(exclusive or) sender_type are contact  
+  #        If sender_type is Contact and add_matter_sender is true  
   #        check the contact_id against matters for a matter_id 
   #
-  if sender_type is "Contact"
+  if sender_type is "Contact" and outbound.communication.add_matter_sender is true
 	  matter_id = Zap.make_get_request(bundle,"https://app.goclio.com/api/v2/matters?status=Open&client_id="+sender_id)
   	_.defaults matter_id.matters,[id:null]
-  else if receiver_type is "Contact"
-	  matter_id = Zap.make_get_request(bundle,"https://app.goclio.com/api/v2/matters?status=Open&client_id="+receiver_id)
-  	_.defaults matter_id.matters,[id:null]
+  #
+  #        If receiver_type is Contact and add_matter_receiver is true  
+  #        check the contact_id against matters for a matter_id 
+  #
+	 if receiver_type is "Contact" and outbound.communication.add_matter_receiver is true
+	   matter_id = Zap.make_get_request(bundle,"https://app.goclio.com/api/v2/matters?status=Open&client_id="+receiver_id)
+  	 _.defaults matter_id.matters,[id:null]
   #
   #        Default values for outbound.communication. 
   #        Stops undefined variable references. 
   #        
-  _.defaults outbound.communication,
-    subject: null
-    body: null
-    matter:
-      id: null
-  #
-  #        Reformat outbound data to be appropriate for 
-  #        the Clio API Communications' data structure.
-  #        
-  outbound = communication:
-    type: "EmailCommunication"
-    subject: outbound.communication.subject
-    body: outbound.communication.body
-    matter:
-      id: matter_id.matters[0].id
-    senders: [
-      id: sender_id
-      type: sender_type
-     ]
-    receivers: [
-      id: receiver_id
-      type: receiver_type
-     ]
-  bundle.request.data = JSON.stringify(outbound)
-  bundle.request
+   _.defaults outbound.communication,
+     subject: null
+     body: null
+     matter:
+       id: null
+   #check for validity of receiver_id and sender_id
+	 if receiver_id is null
+		 throw new HaltedException("given receiver isn't a valid contact or user")
+	 if sender_id is null
+		 throw new HaltedException("given sender isn't a valid contact or user")
+   #
+   #        Reformat outbound data to be appropriate for 
+   #        the Clio API Communications' data structure.
+   #        
+   outbound = communication:
+     type: "EmailCommunication"
+     subject: outbound.communication.subject
+     body: outbound.communication.body
+     matter:
+       id: matter_id.matters[0].id
+     senders: [
+       id: sender_id
+       type: sender_type
+      ]
+     receivers: [
+       id: receiver_id
+       type: receiver_type
+      ]
+   bundle.request.data = JSON.stringify(outbound)
+   bundle.request
