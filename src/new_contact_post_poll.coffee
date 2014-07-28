@@ -1,32 +1,32 @@
 Zap.new_contact_post_poll = (bundle) ->
-	results = JSON.parse(bundle.response.content)
-	array =[]
-	#set defaults for attributes
-	for field in results.contacts
-  	if results.contacts.length < 1
-    	field.first_name = null
-    	field.last_name = null
-    	field.name = null
-    	field.title = null
-    	field.addresses = []
-    	field.email_addresses = []
-    	field.instant_messengers = []
-    	field.web_sites = []
-    	field.custom_field_values = []
-		if field.addresses.length<1
-			field.addresses.push
-			  street:null
-			  city:null
-			  province:null
-			  postal_code:null
-			  country:null
-		if field.phone_numbers.length<1
+  results = JSON.parse(bundle.response.content)
+  array =[]
+  #set defaults for attributes
+  for field in results.contacts
+    if results.contacts.length < 1
+      field.first_name = null
+      field.last_name = null
+      field.name = null
+      field.title = null
+      field.addresses = []
+      field.email_addresses = []
+      field.instant_messengers = []
+      field.web_sites = []
+      field.custom_field_values = []
+    if field.addresses.length<1
+      field.addresses.push
+	      street:null
+	      city:null
+	      province:null
+	      postal_code:null
+	      country:null
+    if field.phone_numbers.length<1
       field.phone_numbers.push
         number: null
     if field.email_addresses.length < 1
       field.email_addresses.push
         address: null
-  	if field.instant_messengers.length < 1
+    if field.instant_messengers.length < 1
       field.instant_messengers.push
         address: null
     if field.web_sites.length < 1
@@ -42,8 +42,8 @@ Zap.new_contact_post_poll = (bundle) ->
           name: null
     if typeof field.custom_field_values[0].matter is "undefined" or field.custom_field_values[0].matter is null 
       field.custom_field_values[0].matter = name: null
-		#populate array
-		array.push 
+	#populate array
+    array.push 
       id: field.id
       title: field.title
       full_name: field.name
@@ -63,7 +63,7 @@ Zap.new_contact_post_poll = (bundle) ->
     
 	  
    #return array of contacts
-	 array
+  array
 	
 	
 		
