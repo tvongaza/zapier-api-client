@@ -13,14 +13,14 @@ Zap.new_contact_post_poll = (bundle) ->
     	field.instant_messengers = []
     	field.web_sites = []
     	field.custom_field_values = []
-		if field.addresses.length < 1
+		if field.addresses.length<1
 			field.addresses.push
-				street:null
-				city:null
-				province:null
-				postal_code:null
-				country:null
-		if field.phone_numbers.length < 1
+			  street:null
+			  city:null
+			  province:null
+			  postal_code:null
+			  country:null
+		if field.phone_numbers.length<1
       field.phone_numbers.push
         number: null
     if field.email_addresses.length < 1
