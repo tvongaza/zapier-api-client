@@ -6,14 +6,20 @@ Zap.create_communication_pre_write = (bundle) ->
   receiver_id = null
   matter_id = null
   user_response = Zap.make_get_request(bundle, "https://app.goclio.com/api/v2/users?query=" + outbound.communication.email_receiver)
+  
+  #check for user with email_receiver
   if user_response.users.length > 0
     receiver_id = user_response.users[0].id
     receiver_type = "User"
+  
+  #check for contact with email_receiver
   if receiver_id is null
     contact_response = Zap.make_get_request(bundle, "https://app.goclio.com/api/v2/contacts?query=" + outbound.communication.email_receiver)
     if contact_response.contacts.length > 0
       receiver_id = contact_response.contacts[0].id
       receiver_type = "Contact"
+  
+  #create new contact with receiver email/name
   if receiver_id is null and outbound.communication.new_contact is true
     receiver_data = JSON.stringify(contact:
       type: "Person"
@@ -29,14 +35,20 @@ Zap.create_communication_pre_write = (bundle) ->
     receiver_id = contact_response.contact.id
     receiver_type = "Contact"
   user_response = Zap.make_get_request(bundle, "https://app.goclio.com/api/v2/users?query=" + outbound.communication.email_sender)
+  
+  #check for user with email_sender
   if user_response.users.length > 0
     sender_id = user_response.users[0].id
     sender_type = "User"
+  
+  #check for contact with email_sender
   if sender_id is null
     contact_response = Zap.make_get_request(bundle, "https://app.goclio.com/api/v2/contacts?query=" + outbound.communication.email_sender)
     if contact_response.contacts.length > 0
       sender_id = contact_response.contacts[0].id
       sender_type = "Contact"
+  
+  #create new contact with sender email/name
   if sender_id is null and outbound.communication.new_contact is true
     sender_data = JSON.stringify(contact:
       type: "Person"
@@ -51,15 +63,29 @@ Zap.create_communication_pre_write = (bundle) ->
     contact_response = Zap.make_post_request(bundle, "https://app.goclio.com/api/v2/contacts", sender_data)
     sender_id = contact_response.contact.id
     sender_type = "Contact"
-  matter_id = Zap.make_get_request(bundle, "https://app.goclio.com/api/v2/matters?status=Open&client_id=" + sender_id)  if sender_type is "Contact" and outbound.communication.add_matter_sender is true
-  matter_id = Zap.make_get_request(bundle, "https://app.goclio.com/api/v2/matters?status=Open&client_id=" + receiver_id)  if receiver_type is "Contact" and outbound.communication.add_matter_receiver is true
   _.defaults outbound.communication,
     subject: null
     body: null
     matter:
       id: null
 
-  matter_id = matters: [id: null]  if matter_id is null
+  
+  #add reference to  sender matter
+  matter_id = Zap.make_get_request(bundle, "https://app.goclio.com/api/v2/matters?status=Open&client_id=" + sender_id)  if sender_type is "Contact" and outbound.communication.add_matter_sender is true
+  
+  #add reference to receiver matter
+  matter_id = Zap.make_get_request(bundle, "https://app.goclio.com/api/v2/matters?status=Open&client_id=" + receiver_id)  if receiver_type is "Contact" and outbound.communication.add_matter_receiver is true
+  
+  #set default values for matter_id
+  matter_id = matters: [id: null]  if matter_id is null or matter_id.records is 0
+  
+  #throw exception if sender_id hasn't been found
+  throw new StopRequestException("Not a valid sender email, check email or select add contact")  if sender_id is null
+  
+  #throw exception if receiver id hasn't been found
+  throw new StopRequestException("Not a valid receiver email, check email or select add contact")  if receiver_id is null
+  
+  #reformat outbound for Zapier
   outbound = communication:
     type: "EmailCommunication"
     subject: outbound.communication.subject
