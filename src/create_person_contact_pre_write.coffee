@@ -34,7 +34,6 @@ Zap.create_person_contact_pre_write = (bundle) ->
       _.defaults outbound.contact.email_addresses,
         name: null
         address: null
-
       if outbound.contact.email_addresses.address is null
         outbound.contact.email_addresses = []
       else
@@ -70,7 +69,6 @@ Zap.create_person_contact_pre_write = (bundle) ->
       _.defaults outbound.contact.custom_field_values,
         id: null
         value: null
-
       if (outbound.contact.custom_field_values.id is null) or (outbound.contact.custom_field_values.value is null)
         outbound.contact.custom_field_values = []
       else
