@@ -5,18 +5,18 @@ Zap.create_communication_pre_write = (bundle) ->
   receiver_type = undefined
   receiver_id = null
   matter_id = null
-  user_response = Zap.make_get_request(bundle, "https://app.goclio.com/api/v2/users?query=" + outbound.communication.email_receiver)
   
   #check for user with email_receiver
-  if user_response.users.length > 0
-    receiver_id = user_response.users[0].id
+  user = Zap.find_user(bundle,outbound.communication.email_receiver)
+  if user isnt null
+    receiver_id = user.id
     receiver_type = "User"
   
   #check for contact with email_receiver
   if receiver_id is null
-    contact_response = Zap.make_get_request(bundle, "https://app.goclio.com/api/v2/contacts?query=" + outbound.communication.email_receiver)
-    if contact_response.contacts.length > 0
-      receiver_id = contact_response.contacts[0].id
+    contact = Zap.find_contact(bundle,outbound.communication.email_receiver)
+    if contact isnt null
+      receiver_id = contact.id
       receiver_type = "Contact"
   
   #create new contact with receiver email/name
@@ -34,18 +34,18 @@ Zap.create_communication_pre_write = (bundle) ->
     contact_response = Zap.make_post_request(bundle, "https://app.goclio.com/api/v2/contacts", receiver_data)
     receiver_id = contact_response.contact.id
     receiver_type = "Contact"
-  user_response = Zap.make_get_request(bundle, "https://app.goclio.com/api/v2/users?query=" + outbound.communication.email_sender)
-  
+    
   #check for user with email_sender
-  if user_response.users.length > 0
-    sender_id = user_response.users[0].id
+  user = Zap.find_user(bundle,outbound.communication.email_receiver)
+  if user isnt null
+    sender_id = user.id
     sender_type = "User"
   
   #check for contact with email_sender
   if sender_id is null
-    contact_response = Zap.make_get_request(bundle, "https://app.goclio.com/api/v2/contacts?query=" + outbound.communication.email_sender)
-    if contact_response.contacts.length > 0
-      sender_id = contact_response.contacts[0].id
+    contact = Zap.find_contact(bundle,outbound.communication.email_sender)
+    if contact isnt null
+      sender_id = contact.id
       sender_type = "Contact"
   
   #create new contact with sender email/name
