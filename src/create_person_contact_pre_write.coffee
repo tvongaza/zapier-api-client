@@ -78,24 +78,5 @@ Zap.create_person_contact_pre_write = (bundle) ->
 
           value: outbound.contact.custom_field_values.value
         ]
-    #
-    #         Existential check so that no undefined variables are used 
-    #         and blocks a search for a user with an ID = null
-    #         
-    unless typeof outbound.contact.activity_rates is "undefined"
-      _.defaults outbound.contact.activity_rates,
-        user: null
-        rate: null
-        flat_rate: null
-      if (outbound.contact.activity_rates.user is null) or (outbound.contact.activity_rates.rate is null) or (outbound.contact.activity_rates.flat_rate is null)
-        outbound.contact.activity_rates = []
-      else
-        outbound.contact.activity_rates = [
-          user:
-            id: outbound.contact.activity_rates.user
-
-          rate: outbound.contact.activity_rates.rate
-          flat_rate: outbound.contact.activity_rates.flat_rate
-        ]
     bundle.request.data = JSON.stringify(outbound)
     bundle.request
