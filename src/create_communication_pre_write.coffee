@@ -36,7 +36,7 @@ Zap.create_communication_pre_write = (bundle) ->
     receiver_type = "Contact"
     
   #check for user with email_sender
-  user = Zap.find_user(bundle,outbound.communication.email_receiver)
+  user = Zap.find_user(bundle,outbound.communication.email_sender)
   if user isnt null
     sender_id = user.id
     sender_type = "User"
