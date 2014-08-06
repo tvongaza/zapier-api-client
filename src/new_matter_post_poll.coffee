@@ -1,9 +1,9 @@
 Zap.new_matter_post_poll = (bundle) ->
   results = JSON.parse(bundle.response.content)
-  array = []
-  custom_fields = {}
-  rates = {}   
+  array = [] 
   for field in results.matters
+    custom_fields = {}
+    rates = {}
     if typeof field.activity_rates is "undefined"
       field.activity_rates = []
     for field_1 in field.activity_rates
