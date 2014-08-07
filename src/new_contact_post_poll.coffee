@@ -1,6 +1,7 @@
 Zap.new_contact_post_poll = (bundle) ->
   results = JSON.parse(bundle.response.content)
   array =[]
+  phone_number = null
   #set defaults for attributes
   for field in results.contacts
     if results.contacts.length < 1
@@ -42,6 +43,12 @@ Zap.new_contact_post_poll = (bundle) ->
           name: null
     if typeof field.custom_field_values[0].matter is "undefined" or field.custom_field_values[0].matter is null 
       field.custom_field_values[0].matter = name: null
+    #determine phone_number
+    for number in field.phone_numbers
+      if number.default_number is true
+        phone_number = number.number
+    if phone_number is null
+      phone_number = field.phone_numbers[0].number
 	#populate array
     array.push 
       id: field.id
@@ -49,7 +56,7 @@ Zap.new_contact_post_poll = (bundle) ->
       full_name: field.name
       first_name: field.first_name
       last_name: field.last_name
-      phone_number: field.phone_numbers[0].number
+      phone_number: phone_number
       email: field.email_addresses[0].address
       street: field.addresses[0].street
       city: field.addresses[0].city
