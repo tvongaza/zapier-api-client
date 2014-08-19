@@ -1,49 +1,28 @@
 Zap.new_matter_post_poll = (bundle) ->
   results = JSON.parse(bundle.response.content)
-  array = []
-  
+  array = [] 
+  all_custom_arr = Zap.make_get_request(bundle,"https://app.goclio.com/api/v2/custom_fields").custom_fields
+  matter_custom_arr = []
+  #get all matter custom fields
+  for custom in all_custom_arr
+    if custom.parent_type is "Matter" and custom.field_type not in ["contact","matter"]
+      matter_custom_arr.push custom
+  #ignored keys
+  ignored_fields = ["activity_rates","flat_rate_activity","flat_rate_rate","flat_rate_activity_description"]
+  #create custom_fields hash
   for field in results.matters
-    if field.custom_field_values.length < 1
-      field.custom_field_values.push
-        value: null
-        custom_field:
-          id: null
-          name: null
-
-    if field.activity_rates.length < 1
-      field.activity_rates.push
-        id: null
-        rate: null
-        flat_rate: null
-
-    
-    if field.responsible_attorney is null
-      field.responsible_attorney =
-        id:null
-        name:null
-        
-    
-    array.push
-      id: field.id
-      responsible_attorney_id: field.responsible_attorney.id
-      responsible_attorney_name: field.responsible_attorney.name
-      display_number: field.display_number
-      client_id: field.client.id
-      client_name: field.client.name
-      description: field.description
-      open_date: field.open_date
-      close_date: field.close_date
-      pending_date: field.pending_date
-      location: field.location
-      practice_area: field.practice_area
-      maildrop_address: field.maildrop_address
-      custom_field_id: field.custom_field_values[0].custom_field.id
-      custom_field_name: field.custom_field_values[0].custom_field.name
-      custom_field_value: field.custom_field_values[0].value
-      activity_id: field.activity_rates[0].id
-      activity_rate: field.activity_rates[0].rate
-      activity_flat_rate: field.activity_rates[0].flat_rate
-
+    custom_fields = {}
+    value = null 
+    for field_2 in matter_custom_arr
+      for field_3 in field.custom_field_values
+        if field_2.id is field_3.custom_field.id
+          value = field_3.value
+      custom_fields[field_2.name] = value
+    field.custom_field_values = custom_fields
+    for key in ignored_fields
+      if field.hasOwnProperty(key)
+        delete field[key]
+    array.push field
   array
 		
 		
