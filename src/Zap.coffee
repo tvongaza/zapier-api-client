@@ -31,14 +31,9 @@ Zap.transform_custom_fields = (bundle, object, parent_type) ->
       custom_fields[custom_field_value.custom_field.name] = custom_field_value.value
   custom_fields
 
-Zap.flatten_nested_attributes = (object, data, keys) ->
-  for key in keys
-    data[key] = null
-    data["#{key}_id"] = null
-    if object[key] and object[key].id && object[key].name
-      data[key] = object[key].name
-      data["#{key}_id"] = object[key].id
-  data
+Zap.transform_nested_attributes = (object) ->
+  object ?= {"id":null, "name":null}
+  {"id": object.id, "name": object.name}
 
 Zap.flatten_array = (array, default_keys) ->
   # Find our defaults

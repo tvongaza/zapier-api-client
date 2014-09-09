@@ -23,7 +23,10 @@ Zap.new_matter_post_poll = (bundle) ->
     data.billable = object.billable
     data.maildrop_address = object.maildrop_address
     data.billing_method = object.billing_method
-    data = Zap.flatten_nested_attributes(object, data, ["client", "responsible_attorney", "originating_attorney", "practice_area"])
+    data.client = Zap.transform_nested_attributes(object.client)
+    data.responsible_attorney = Zap.transform_nested_attributes(object.responsible_attorney)
+    data.originating_attorney = Zap.transform_nested_attributes(object.originating_attorney)
+    data.practice_area = Zap.transform_nested_attributes(object.practice_area)
     data.custom_fields = Zap.transform_custom_fields(bundle, object, "Matter")
     array.push data
   array

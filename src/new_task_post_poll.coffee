@@ -1,34 +1,27 @@
 Zap.new_task_post_poll = (bundle) ->
   results = JSON.parse(bundle.response.content)
+  
   array = []
-  #set defaults for attributes
-  for field in results.tasks
-    if field.reminders.length<1
-      field.reminders.push
-        minutes:null
-        method:null
-    if field.matter is null
-      field.matter =
-        id:null
-        name:null
-    #populate array
-    array.push
-      id:field.id
-      name:field.name
-      description:field.description
-      priority:field.priority
-      user_id:field.user.id
-      user_name:field.user.name
-      assingner_id:field.assigner.id
-      assigner_name:field.assigner.name
-      matter_id:field.matter.id
-      matter_name:field.matter.name
-      due_at:field.due_at
-      completed:field.completed
-      is_private:field.is_private
-      is_statute_of_limitations:field.is_statute_of_limitations
-      reminder_minutes:field.reminders[0].id
-      reminder_method:field.reminders[0].method
-  #return array
+  for object in results.tasks
+    # The format of this data MUST match the sample data format in triggers "Sample Result"
+    # To get a sample, build a new object with good data and create a Zap, you should see
+    # bundle output (from scripting editor quicklinks) once you try and add a field in the
+    # Zap editor
+
+    data = {}
+    data.id = object.id
+    data.created_at = object.created_at
+    data.updated_at = object.updated_at
+    data.name = object.name
+    data.description = object.description
+    data.priority = object.priority
+    data.due_at = object.due_at
+    data.completed_at = object.completed_at
+    data.complete = object.complete
+    data.is_private = object.is_private
+    data.is_statute_of_limitations = object.is_statute_of_limitations
+    data.assignee = Zap.transform_nested_attributes(object.assignee)
+    data.assigner = Zap.transform_nested_attributes(object.assigner)
+    data.matter = Zap.transform_nested_attributes(object.matter)
+    array.push data
   array
-        
