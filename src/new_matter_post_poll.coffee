@@ -1,16 +1,3 @@
-Zap.new_matter_pre_poll = (bundle) ->
-  request_bundle = {
-    url: bundle.request.url,
-    method: bundle.request.method,
-    auth: bundle.request.auth,
-    headers: bundle.request.headers,
-    params: bundle.request.params,
-    data: bundle.request.data
-  }
-  for own key, value in bundle.trigger_fields
-    request_bundle.url = "#{request_bundle.url}&#{key}=#{value}"
-  request_bundle
-
 Zap.new_matter_post_poll = (bundle) ->
   results = JSON.parse(bundle.response.content)
 
