@@ -1,35 +1,23 @@
-Zap.new_communication_post_poll = (bundle)->
-	results = JSON.parse(bundle.response.content)
-	array = []
-	for field in results.communications
-		#defaults incase senders=[] or receivers = []
-		_.defaults field.senders,
-		[
-			id:null
-			name:null
-		]
-		_.defaults field.receivers,
-		[
-			id:null
-			name:null
-		]
-		if field.matter is null
-			field.matter =
-				id:null
-				name:null
-		array.push
-			id:field.id
-			type:field.type
-			date:field.date
-			subject:field.subject
-			body:field.body
-			matter_id:field.matter.id
-			matter_name:field.matter.name
-			sender_id:field.senders[0].id
-			sender_name:field.senders[0].name
-			receiver_id:field.receivers[0].id
-			receiver_name:field.receivers[0].name
-	#return array
-	array
-		 
-		
+Zap.new_communication_post_poll = (bundle) ->
+  results = JSON.parse(bundle.response.content)
+  
+  array = []
+  for object in results.communications
+    # The format of this data MUST match the sample data format in triggers "Sample Result"
+    # To get a sample, build a new object with good data and create a Zap, you should see
+    # bundle output (from scripting editor quicklinks) once you try and add a field in the
+    # Zap editor
+
+    data = {}
+    data.id = object.id
+    data.created_at = object.created_at
+    data.updated_at = object.updated_at
+    data.type = object.type
+    data.date = object.date
+    data.subject = object.subject
+    data.body = object.body
+    data.matter = Zap.transform_nested_attributes(object.matter)
+    data.sender = Zap.flatten_array(object.senders, ["id","name", "type"])
+    data.receiver = Zap.flatten_array(object.receivers, ["id","name", "type"])
+    array.push data
+  array

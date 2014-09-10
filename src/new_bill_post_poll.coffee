@@ -1,36 +1,36 @@
-Zap.new_bill_post_poll = (bundle)->
-	results = JSON.parse(bundle.response.content)
-	array=[]
-	#loop through results to re-format for Zapier
-	for field in results.bills
-		#populate array
-		array.push
-			id:field.id
-			number:field.number
-			subject:field.subject
-			currency:field.currency
-			purchase_order:field.purchase_order
-			memo:field.memo
-			start_at:field.start_at
-			end_at:field.end_at
-			issued_at:field.issued_at
-			due_at:field.due_at
-			type:field.type
-			original_bill_id:field.original_bill_id
-			tax_rate:field.tax_rate
-			secondary_tax_rate:field.secondary_tax_rate
-			discount:field.discount
-			discount_type:field.discount_type
-			discount_note:field.discount_note
-			balance:field.balance
-			balance_with_interest:field.balance_with_interest
-			total:field.total
-			status:field.status
-			state:field.state
-			matter_id:field.matters[0].id
-			matter_name:field.matters[0].name
-			client_id:field.client.id
-			client_name:field.client.name
-	#return array
-	array
-		
+Zap.new_bill_post_poll = (bundle) ->
+  results = JSON.parse(bundle.response.content)
+  
+  array = []
+  for object in results.bills
+    # The format of this data MUST match the sample data format in triggers "Sample Result"
+    # To get a sample, build a new object with good data and create a Zap, you should see
+    # bundle output (from scripting editor quicklinks) once you try and add a field in the
+    # Zap editor
+
+    data = {}
+    data.id = object.id
+    data.created_at = object.created_at
+    data.updated_at = object.updated_at
+    data.type = object.type
+    data.number = object.number
+    data.purchase_order = object.purchase_order
+    data.currency = object.currency
+    data.memo = object.memo
+    data.start_at = object.start_at
+    data.end_at = object.end_at
+    data.issued_at = object.issued_at
+    data.due_at = object.due_at
+    data.original_bill_id = object.original_bill_id
+    data.tax_rate = object.tax_rate
+    data.secondary_tax_rate = object.secondary_tax_rate
+    data.discount = object.discount
+    data.discount_type = object.discount_type
+    data.discount_note = object.discount_note
+    data.balance = object.balance
+    data.balance_with_interest = object.balance_with_interest
+    data.total = object.total
+    data.state = object.state
+    data.client = Zap.transform_nested_attributes(object.client)
+    array.push data
+  array
