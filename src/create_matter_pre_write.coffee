@@ -12,6 +12,11 @@ Zap.create_matter_pre_write = (bundle) ->
   if contact? && contact.id?
     data.client_id = contact.id
 
+  if object.practice_area? && !!object.practice_area.name
+    practice_area= Zap.find_practice_area(bundle, object.practice_area.name, object.practice_area.question)
+    if practice_area? && practice_area.id?
+      data.practice_area_id = practice_area.id
+
   if object.responsible_attorney? && !!object.responsible_attorney.name
     responsible_attorney = Zap.find_user(bundle, object.responsible_attorney.name, object.responsible_attorney.question, "Attorney")
     if responsible_attorney? && responsible_attorney.id?
