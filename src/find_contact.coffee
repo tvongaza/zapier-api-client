@@ -22,7 +22,7 @@ Zap.find_contact = (bundle, object) ->
       contact = response.contacts[0]
   # If no email or not found, try with the name
   if !contact? && (!object.email? || !!object.email)
-    response = Zap.make_get_request(bundle, "https://app.goclio.com/api/v2/contacts?query=#{encodeURIComponent(object.name)}&limit=1")
+    response = Zap.make_get_request(bundle, "https://app.goclio.com/api/v2/contacts?name=#{encodeURIComponent(object.name)}&limit=1")
     if response.contacts.length > 0
       contact = response.contacts[0]
   contact

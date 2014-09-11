@@ -12,6 +12,7 @@ Zap.custom_field_question = (object,choices) ->
   question.label = "If #{object.name} (#{object.field_type}) not found?"
   question.help_text = "What happens when we can't find #{object.field_type}?"
   question.type = "unicode"
+  question.default = "ignore"
   question.choices = choices
   question
 

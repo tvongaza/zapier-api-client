@@ -1,26 +1,21 @@
 Zap.create_task_pre_write = (bundle) ->
-    outbound = JSON.parse(bundle.request.data)
-    #default reminder values
-    _.defaults outbound.task,
-      reminders:
-        unit: null
-        amount: null
-    #Unit of time chosen
-    reminderTimeUnit = outbound.task.reminders.unit
-    #Amount of time
-    reminderAmount = outbound.task.reminders.amount
-    #Time conversion to minutes
-    switch reminderTimeUnit
-      when "Hours"
-        reminderAmount = reminderAmount * 60
-      when "Days"
-        reminderAmount = reminderAmount * 1440
-      when "Weeks"
-        reminderAmount = reminderAmount * 10080
-    # entry into reminders list
-    outbound.task.reminders = [
-      minutes: reminderAmount
-      method: "Popup"
-    ]
-    bundle.request.data = JSON.stringify(outbound)
-    bundle.request
+  request_data = JSON.parse(bundle.request.data)
+  object = request_data.task
+  
+  data = {}
+  data.name = object.name
+  data.due_at = object.due_at
+  data.description = object.description
+  data.priority = object.priority
+  data.is_private = object.is_private
+  
+  assignee = Zap.find_user(bundle, object.assignee.name, "ignore")
+  if assignee?
+    data.assignee_id = assignee.id
+  
+  matter = Zap.find_matter(bundle, object.matter.name, object.matter.question)
+  if matter?
+    data.matter_id = matter.id
+  
+  bundle.request.data = JSON.stringify({"task": data})
+  bundle.request
