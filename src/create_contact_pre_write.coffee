@@ -13,9 +13,9 @@ Zap.create_contact_pre_write = (bundle) ->
     data.phone_numbers = [{"name": phone_type, "number": object.phone_number.number}]
   
   if object.email_address? && object.email_address.address?
-    email_address= object.email_address.name
-    email_address ?= "Work"
-    data.email_addresses = [{"name": phone_type, "number": object.email_address.address}]
+    email_address_type = object.email_address.name
+    email_address_type ?= "Work"
+    data.email_addresses = [{"name": email_address_type, "address": object.email_address.address}]
   
   if data.type == "Person"
     company = Zap.find_or_create_contact(bundle, object.company, object.company.question)
