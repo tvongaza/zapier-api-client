@@ -5,7 +5,10 @@ Zap.create_activity_pre_write = (bundle) ->
   data = {}
   data.type = object.type
   data.date = object.date
-  data.quantity = object.quantity
+  if object.type == "TimeEntry"
+    data.quantity = object.quantity * 60*60 # hours
+  else
+    data.quantity = 1
   data.price = object.price
   data.note = object.note
   
