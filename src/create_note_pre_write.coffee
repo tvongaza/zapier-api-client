@@ -11,7 +11,7 @@ Zap.create_note_pre_write = (bundle, regarding_type) ->
   data.subject = object.subject
   data.detail = object.detail
   data.date = object.date
-
+  
   if regarding_type == "Matter"
     matter = Zap.find_matter(bundle, object.matter.name, "cancel")
     if matter?
