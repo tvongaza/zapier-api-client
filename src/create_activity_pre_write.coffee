@@ -1,29 +1,24 @@
 Zap.create_activity_pre_write = (bundle) ->
-  outbound = JSON.parse(bundle.request.data)
-  matter_response = Zap.make_get_request(bundle,"https://app.goclio.com/api/v2/matters?display_number="+outbound.activity.matter_display_number)
-  _.defaults matter_response.matters,
-    [id:null]
-  if matter_response.matters[0].id is null 
-    throw new HaltedException('Invalid matter display_number')
+  request_data = JSON.parse(bundle.request.data)
+  object = request_data.activity
+  
+  data = {}
+  data.type = object.type
+  data.date = object.date
+  if object.type == "TimeEntry"
+    data.quantity = object.quantity * 60*60 # hours
   else
-    matter_id = matter_response.matters[0].id
-  user_response = Zap.make_get_request(bundle,"https://app.goclio.com/api/v2/users?query="+outbound.activity.user.email)
-  _.defaults user_response.users,
-    [id: null] 
-  if user_response.users[0].id is null
-    throw new HaltedException('Invalid user email')
-  else
-    user_id = user_response.users[0].id
-  outbound = activity:
-    type: outbound.activity.type
-    date: outbound.activity.date
-    quantity: outbound.activity.quantity
-    note: outbound.activity.note
-    price: outbound.activity.price
-    user:
-      id: user_id
-    matter:
-      id: matter_id
-  bundle.request.data = JSON.stringify(outbound)
-  bundle.request
-   
+    data.quantity = 1
+  data.price = object.price
+  data.note = object.note
+  
+  user = Zap.find_user(bundle, object.user.name, object.user.question)
+  if user?
+    data.user_id = user.id
+  
+  matter = Zap.find_matter(bundle, object.matter.name, object.matter.question)
+  if matter?
+    data.matter_id = matter.id
+  
+  bundle.request.data = JSON.stringify({"activity": data})
+  bundle.request   

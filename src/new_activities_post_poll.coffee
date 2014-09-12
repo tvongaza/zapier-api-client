@@ -1,8 +1,8 @@
-Zap.new_task_post_poll = (bundle) ->
+Zap.new_activity_post_poll = (bundle) ->
   results = JSON.parse(bundle.response.content)
   
   array = []
-  for object in results.tasks
+  for object in results.activities
     # The format of this data MUST match the sample data format in triggers "Sample Result"
     # To get a sample, build a new object with good data and create a Zap, you should see
     # bundle output (from scripting editor quicklinks) once you try and add a field in the
@@ -12,16 +12,16 @@ Zap.new_task_post_poll = (bundle) ->
     data.id = object.id
     data.created_at = object.created_at
     data.updated_at = object.updated_at
-    data.name = object.name
-    data.description = object.description
-    data.priority = object.priority
-    data.due_at = object.due_at
-    data.completed_at = object.completed_at
-    data.complete = object.complete
-    data.is_private = object.is_private
-    data.is_statute_of_limitations = object.is_statute_of_limitations
-    data.assignee = Zap.transform_nested_attributes(object.assignee)
-    data.assigner = Zap.transform_nested_attributes(object.assigner)
+    data.type = object.type
+    data.date = object.date
+    data.quantity = object.quantity
+    data.price = object.price
+    data.total = object.total
+    data.note = object.note
+    data.billed = object.billed
+    data.activity_description = Zap.transform_nested_attributes(object.activity_description)
+    data.user = Zap.transform_nested_attributes(object.user)
     data.matter = Zap.transform_nested_attributes(object.matter)
+    data.bill = Zap.transform_nested_attributes(object.bill)
     array.push data
   array

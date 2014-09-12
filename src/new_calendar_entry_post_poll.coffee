@@ -1,40 +1,24 @@
 Zap.new_calendar_entry_post_poll = (bundle) ->
-	results = JSON.parse(bundle.response.content)
-	array = []
-	#loop through results to reformat for Zapier
-	for field in results.calendar_entries
-		#default values for reminders
-		if field.reminders.length<1
-			field.reminders.push
-				minutes:null
-				method:null
-		#default values for attending calendars
-		if field.attending_calendars.length<1
-			field.attending_calendars.push
-				id:null
-				name:null
-				type:null
-		#default values for matter
-		if field.matter is null
-			field.matter =
-				id:null
-				display_number:null
-		#populate array
-		array.push
-			id:field.id
-			calendar_id:field.calendar.id
-			calendar_name:field.calendar.name
-			attending_calendar_id:field.attending_calendars[0].id
-			attending_calendar_name:field.attending_calendars[0].name
-			attending_calendar_type:field.attending_calendars[0].type
-			start_date_time:field.start_date_time
-			end_date_time:field.end_date_time
-			original_event_start_date_time:field.original_event_start_date_time
-			summary:field.summary
-			location:field.location
-			matter_id:field.matter.id
-			matter_name:field.matter.display_number
-	#return array
-	array
-			
-				
+  results = JSON.parse(bundle.response.content)
+  
+  array = []
+  for object in results.calendar_entries
+    # The format of this data MUST match the sample data format in triggers "Sample Result"
+    # To get a sample, build a new object with good data and create a Zap, you should see
+    # bundle output (from scripting editor quicklinks) once you try and add a field in the
+    # Zap editor
+
+    data = {}
+    data.id = object.id
+    data.created_at = object.created_at
+    data.updated_at = object.updated_at
+    data.summary = object.summary
+    data.description = object.description
+    data.location = object.location
+    data.permission = object.permission
+    data.start_at = object.start_date or object.start_date_time
+    data.end_at = object.end_date or object.end_date_time
+    data.matter = Zap.transform_nested_attributes(object.matter)
+    data.calendar = Zap.transform_nested_attributes(object.calendar)
+    array.push data
+  array

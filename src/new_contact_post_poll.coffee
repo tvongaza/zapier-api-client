@@ -1,77 +1,27 @@
 Zap.new_contact_post_poll = (bundle) ->
   results = JSON.parse(bundle.response.content)
-  array =[]
-  phone_number = null
-  #set defaults for attributes
-  for field in results.contacts
-    if results.contacts.length < 1
-      field.first_name = null
-      field.last_name = null
-      field.name = null
-      field.title = null
-      field.addresses = []
-      field.email_addresses = []
-      field.instant_messengers = []
-      field.web_sites = []
-      field.custom_field_values = []
-    if field.addresses.length<1
-      field.addresses.push
-        street:null
-        city:null
-        province:null
-        postal_code:null
-        country:null
-    if field.phone_numbers.length<1
-      field.phone_numbers.push
-        number: null
-    if field.email_addresses.length < 1
-      field.email_addresses.push
-        address: null
-    if field.instant_messengers.length < 1
-      field.instant_messengers.push
-        address: null
-    if field.web_sites.length < 1
-      field.web_sites.push
-        address: null
-    if field.custom_field_values.length < 1
-      field.custom_field_values.push
-        type: null
-        value: null
-        custom_field:
-          name: null
-        matter:
-          name: null
-    if typeof field.custom_field_values[0].matter is "undefined" or field.custom_field_values[0].matter is null 
-      field.custom_field_values[0].matter = name: null
-    #determine phone_number
-    for number in field.phone_numbers
-      if number.default_number is true
-        phone_number = number.number
-    if phone_number is null
-      phone_number = field.phone_numbers[0].number
-	#populate array
-    array.push 
-      id: field.id
-      title: field.title
-      full_name: field.name
-      first_name: field.first_name
-      last_name: field.last_name
-      phone_number: phone_number
-      email: field.email_addresses[0].address
-      street: field.addresses[0].street
-      city: field.addresses[0].city
-      province: field.addresses[0].province
-      postal_code: field.addresses[0].postal_code
-      country: field.addresses[0].country
-      intant_messenger: field.instant_messengers[0].address
-      web_site: field.web_sites[0].address
-      matter: field.custom_field_values[0].matter.name
-      custom_field_name: field.custom_field_values[0].custom_field.name
+  
+  array = []
+  for object in results.contacts
+    # The format of this data MUST match the sample data format in triggers "Sample Result"
+    # To get a sample, build a new object with good data and create a Zap, you should see
+    # bundle output (from scripting editor quicklinks) once you try and add a field in the
+    # Zap editor
     
-	  
-   #return array of contacts
+    data = {}
+    data.id = object.id
+    data.created_at = object.created_at
+    data.updated_at = object.updated_at
+    data.name = object.name
+    data.first_name = object.first_name
+    data.last_name = object.last_name
+    data.title = object.title
+    data.company = Zap.transform_nested_attributes(object.company)
+    data.email_address = Zap.flatten_array(object.email_addresses , ["name","address"])
+    data.phone_number = Zap.flatten_array(object.phone_numbers, ["name", "number"])
+    data.instant_messenger = Zap.flatten_array(object.instant_messengers, ["name", "address"])
+    data.web_site = Zap.flatten_array(object.web_sites, ["name", "address"])
+    data.address = Zap.flatten_array(object.addresses, ["name", "street", "city", "province", "postal_code", "country"])
+    data.custom_field = Zap.transform_custom_fields(bundle, object, "Contact")
+    array.push data
   array
-	
-	
-		
-	
