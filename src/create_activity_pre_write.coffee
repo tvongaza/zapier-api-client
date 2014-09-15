@@ -12,13 +12,15 @@ Zap.create_activity_pre_write = (bundle) ->
   data.price = object.price
   data.note = object.note
   
-  user = Zap.find_user(bundle, object.user.name, object.user.question)
-  if user?
-    data.user_id = user.id
+  if object.user?
+    user = Zap.find_user(bundle, object.user.name, object.user.question)
+    if user?
+      data.user_id = user.id
   
-  matter = Zap.find_matter(bundle, object.matter.name, object.matter.question)
-  if matter?
-    data.matter_id = matter.id
+  if object.matter?
+    matter = Zap.find_matter(bundle, object.matter.name, object.matter.question)
+    if matter?
+      data.matter_id = matter.id
   
   bundle.request.data = JSON.stringify({"activity": data})
   bundle.request   

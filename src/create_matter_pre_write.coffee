@@ -8,9 +8,10 @@ Zap.create_matter_pre_write = (bundle) ->
   data.description = object.description
   data.billable = object.billable
   
-  contact = Zap.find_or_create_contact(bundle, object.client, object.client.question)
-  if contact? && contact.id?
-    data.client_id = contact.id
+  if object.contact?
+    contact = Zap.find_or_create_contact(bundle, object.client, object.client.question)
+    if contact? && contact.id?
+      data.client_id = contact.id
 
   if object.practice_area? && !!object.practice_area.name
     practice_area= Zap.find_practice_area(bundle, object.practice_area.name, object.practice_area.question)

@@ -1,5 +1,5 @@
-Zap.find_or_create_contact = (bundle, object, not_found) ->
-  contact = Zap.find_contact(bundle, object)
+Zap.find_or_create_contact = (bundle, object, not_found, search_contact_type) ->
+  contact = Zap.find_contact(bundle, object, search_contact_type)
   unless contact
     switch not_found
       when "Person", "Company"
@@ -12,22 +12,79 @@ Zap.find_or_create_contact = (bundle, object, not_found) ->
         throw new HaltedException('Could not find contact');
       
   contact
+  
+Zap.find_user_or_contact_or_create_contact = (bundle, object, not_found) ->
+  found_object = Zap.find_user_or_contact(bundle, object)
 
-Zap.find_contact = (bundle, object) ->
+  unless found_object
+    switch not_found
+      when "Person", "Company"
+        found_object= Zap.create_contact(bundle, object, not_found)
+      when "cancel"
+        throw new StopRequestException("Could not find contact or user.")
+      when "ignore"
+        null #noop
+      else
+        throw new HaltedException('Could not find contact or user.');  
+  
+  found_object
+
+Zap.find_user_or_contact = (bundle, object) ->
+  found_object = null
+  if isFinite(bundle.name)
+    found_object ?= Zap.find_user_by_id(bundle, bundle.name)
+    found_object ?= Zap.find_contact_by_id(bundle, bundle.name)
+    
+  if object.email? && object.email != ""
+    found_object ?= Zap.find_user_by_query(bundle, object.email)
+    found_object ?= Zap.find_contact_by_email(bundle, object.email)
+    
+  if !object.email? || !!object.email
+    found_object ?= Zap.find_user_by_query(bundle, object.name)
+    found_object ?= Zap.find_contact_by_name(bundle, object.name)
+  
+  found_object
+
+Zap.find_contact = (bundle, object, search_contact_type) ->
   contact = null
+  # if name is a number, try by id
+  if isFinite(object.name)
+    contact ?= Zap.find_contact_by_id(bundle, object.name, search_contact_type)
   # if email set, try to find by it
   if object.email? && object.email != ""
-    response = Zap.make_get_request(bundle, "https://app.goclio.com/api/v2/contacts?query=#{encodeURIComponent(object.email)}&limit=1")
-    if response.contacts.length > 0
-      contact = response.contacts[0]
+    contact ?= Zap.find_contact_by_email(bundle, object.email, search_contact_type)
   # If no email or not found, try with the name
-  if !contact? && (!object.email? || !!object.email)
-    response = Zap.make_get_request(bundle, "https://app.goclio.com/api/v2/contacts?name=#{encodeURIComponent(object.name)}&limit=1")
+  if !object.email? || !!object.email && object.name != ""
+    contact ?= Zap.find_contact_by_name(bundle, object.name, search_contact_type)
+  contact
+
+Zap.find_contact_by_id = (bundle, id, search_contact_type) ->
+  contact = null
+  if isFinite(id)
+    response = Zap.make_get_request(bundle, "https://app.goclio.com/api/v2/contacts?ids=#{encodeURIComponent(id)}&limit=1#{Zap.find_contact_type_to_query(search_contact_type)}")
     if response.contacts.length > 0
       contact = response.contacts[0]
   contact
 
+Zap.find_contact_by_email = (bundle, email, search_contact_type) ->
+  contact = null
+  # Sanity check on email
+  if email? && email != ""
+    response = Zap.make_get_request(bundle, "https://app.goclio.com/api/v2/contacts?query=#{encodeURIComponent(email)}&limit=1#{Zap.find_contact_type_to_query(search_contact_type)}")
+    if response.contacts.length > 0
+      contact = response.contacts[0]
+  contact
+
+Zap.find_contact_by_name = (bundle, name, search_contact_type) ->
+  contact = null
+  response = Zap.make_get_request(bundle, "https://app.goclio.com/api/v2/contacts?name=#{encodeURIComponent(name)}&limit=1#{Zap.find_contact_type_to_query(search_contact_type)}")
+  if response.contacts.length > 0
+    contact = response.contacts[0]
+  contact
+
 Zap.create_contact = (bundle, object, contact_type) ->
+  if !object.name? || object.name == ""
+    throw new HaltedException("Could not create #{contact_type} without a name")
   data = { "type": contact_type, "name": object.name }
   # if email set, add it
   if object.email? && object.email != ""
@@ -36,3 +93,10 @@ Zap.create_contact = (bundle, object, contact_type) ->
   unless response.hasOwnProperty("contact")
     throw new HaltedException('Could not create new contact');
   response.contact
+  
+Zap.find_contact_type_to_query = (search_contact_type) ->
+  if search_contact_type? && search_contact_type != ""
+    search_contact_type= "&type=#{encodeURIComponent(search_contact_type)}"
+  else
+    search_contact_type= ""
+  search_contact_type

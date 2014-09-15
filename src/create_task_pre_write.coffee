@@ -9,13 +9,15 @@ Zap.create_task_pre_write = (bundle) ->
   data.priority = object.priority
   data.is_private = object.is_private
   
-  assignee = Zap.find_user(bundle, object.assignee.name, "ignore")
-  if assignee?
-    data.assignee_id = assignee.id
+  if object.assignee?
+    assignee = Zap.find_user(bundle, object.assignee.name, "ignore")
+    if assignee?
+      data.assignee_id = assignee.id
   
-  matter = Zap.find_matter(bundle, object.matter.name, object.matter.question)
-  if matter?
-    data.matter_id = matter.id
+  if object.matter?
+    matter = Zap.find_matter(bundle, object.matter.name, object.matter.question)
+    if matter?
+      data.matter_id = matter.id
   
   bundle.request.data = JSON.stringify({"task": data})
   bundle.request
