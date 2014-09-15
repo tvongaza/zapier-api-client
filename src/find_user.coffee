@@ -1,20 +1,10 @@
 Zap.find_user = (bundle, query, not_found, subscription_plan) ->
   user = null
-  if subscription_plan?
-    subscription_plan = "&subscription_plan=#{encodeURIComponent(subscription_plan)}"
-  else
-    subscription_plan = ""
 
   if isFinite(query)
-    response = Zap.make_get_request(bundle, "https://app.goclio.com/api/v2/users?ids=#{encodeURIComponent(query)}#{subscription_plan}&limit=1")
-    if response.users.length > 0
-          user = response.users[0]
-
-  unless user?
-    response = Zap.make_get_request(bundle, "https://app.goclio.com/api/v2/users?query=#{encodeURIComponent(query)}#{subscription_plan}&limit=1")
-    if response.users.length > 0
-      user = response.users[0]
-
+    user ?= Zap.find_user_by_id(bundle, query, subscription_plan)
+  user ?= Zap.find_user_by_query(query, subscription_plan)
+    
   unless user?
     switch not_found
       when "cancel"
@@ -23,5 +13,27 @@ Zap.find_user = (bundle, query, not_found, subscription_plan) ->
         null #noop
       else
         throw new HaltedException('Could not find user');
-    
+  
   user
+
+Zap.find_user_by_id = (bundle, id, subscription_plan) ->
+  user = null
+  if isFinite(id)
+    response = Zap.make_get_request(bundle, "https://app.goclio.com/api/v2/users?ids=#{encodeURIComponent(id)}#{Zap.find_user_subscription_plan_to_query(subscription_plan)}&limit=1")
+    if response.users.length > 0
+          user = response.users[0]
+  user
+
+Zap.find_user_by_query = (bundle, query, subscription_plan) ->
+  user = null
+  response = Zap.make_get_request(bundle, "https://app.goclio.com/api/v2/users?query=#{encodeURIComponent(query)}#{Zap.find_user_subscription_plan_to_query(subscription_plan)}&limit=1")
+  if response.users.length > 0
+    user = response.users[0]
+  user
+
+Zap.find_user_subscription_plan_to_query = (subscription_plan) ->
+  if subscription_plan?
+    subscription_plan = "&subscription_plan=#{encodeURIComponent(subscription_plan)}"
+  else
+    subscription_plan = ""
+  subscription_plan
