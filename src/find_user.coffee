@@ -3,7 +3,7 @@ Zap.find_user = (bundle, query, not_found, subscription_plan) ->
 
   if isFinite(query)
     user ?= Zap.find_user_by_id(bundle, query, subscription_plan)
-  user ?= Zap.find_user_by_query(query, subscription_plan)
+  user ?= Zap.find_user_by_query(bundle, query, subscription_plan)
     
   unless user?
     switch not_found
@@ -32,7 +32,7 @@ Zap.find_user_by_query = (bundle, query, subscription_plan) ->
   user
 
 Zap.find_user_subscription_plan_to_query = (subscription_plan) ->
-  if subscription_plan?
+  if subscription_plan? && subscription_plan != ""
     subscription_plan = "&subscription_plan=#{encodeURIComponent(subscription_plan)}"
   else
     subscription_plan = ""

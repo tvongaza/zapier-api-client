@@ -19,9 +19,10 @@ Zap.create_calendar_entry_pre_write = (bundle) ->
     x.type == "UserCalendar" && x.permission == "owner"
   data.calendar_id = users_calendar[0].id
 
-  matter = Zap.find_matter(bundle, object.matter.name, object.matter.question)
-  if matter?
-    data.matter_id = matter.id
+  if object.matter?
+    matter = Zap.find_matter(bundle, object.matter.name, object.matter.question)
+    if matter?
+      data.matter_id = matter.id
 
   bundle.request.data = JSON.stringify({"calendar_entry": data})
   bundle.request

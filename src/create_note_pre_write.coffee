@@ -12,13 +12,13 @@ Zap.create_note_pre_write = (bundle, regarding_type) ->
   data.detail = object.detail
   data.date = object.date
   
-  if regarding_type == "Matter"
+  if regarding_type == "Matter" && object.matter?
     matter = Zap.find_matter(bundle, object.matter.name, "cancel")
     if matter?
       data.regarding = {}
       data.regarding.type = regarding_type
       data.regarding.id = matter.id
-  if regarding_type == "Contact"
+  if regarding_type == "Contact" && object.contact?
     contact = Zap.find_or_create_contact(bundle, object.contact, object.contact.question)
     if contact?
       data.regarding = {}
