@@ -1,11 +1,22 @@
-Zap.create_contact_pre_write = (bundle) ->
+Zap.create_person_pre_write = (bundle) ->
+  Zap.create_contact_pre_write(bundle, "Person")
+  
+Zap.create_company_pre_write = (bundle) ->
+  Zap.create_contact_pre_write(bundle, "Company")
+
+Zap.create_contact_pre_write = (bundle, contact_type) ->
   request_data = JSON.parse(bundle.request.data)
   object = request_data.contact
   custom_field_values = request_data.custom_fields
   
   data = {}
+  data.type = contact_type
   data.name = object.name
-  data.type = object.type
+
+  if contact_type == "Person" && object.company?
+    company = Zap.find_or_create_contact(bundle, object.company, object.company.question, "Company")
+    if company? && company.id?
+      data.company_id = company.id
   
   if object.phone_number? && object.phone_number.number?
     phone_type = object.phone_number.name
@@ -17,22 +28,26 @@ Zap.create_contact_pre_write = (bundle) ->
     email_address_type ?= "Work"
     data.email_addresses = [{"name": email_address_type, "address": object.email_address.address}]
   
-  if data.type == "Person" && object.company?
-    company = Zap.find_or_create_contact(bundle, object.company, object.company.question, "Company")
-    if company? && company.id?
-      data.company_id = company.id
-
   for own custom_field_id, custom_field_data of custom_field_values
     for own custom_field_type, custom_field_value_raw of custom_field_data
-      if custom_field_value_raw? && !!custom_field_value_raw
+      if valueExists custom_field_value_raw
         custom_field_value = null
         data.custom_field_values ?= []
         if custom_field_type == "contact"
-          contact = Zap.find_or_create_contact(bundle, {"name": custom_field_value_raw, "email": request_data.custom_field_questions_email[custom_field_id]}, request_data.custom_field_questions[custom_field_id])
+          cf_data = {"name": custom_field_value_raw}
+          if request_data.custom_field_questions_email? && valueExists request_data.custom_field_questions_email[custom_field_id]
+            cf_data["email"] = request_data.custom_field_questions_email[custom_field_id]
+          question = null
+          if request_data.custom_field_questions? && valueExists request_data.custom_field_questions[custom_field_id]
+            question = request_data.custom_field_questions[custom_field_id]
+          contact = Zap.find_or_create_contact(bundle, cf_data, question)
           if contact?
             custom_field_value = contact.id
         else if custom_field_type == "matter"
-          matter = Zap.find_matter(bundle, custom_field_value_raw, request_data.custom_field_questions[custom_field_id])
+          question = null
+          if request_data.custom_field_questions? && valueExists request_data.custom_field_questions[custom_field_id]
+            question = request_data.custom_field_questions[custom_field_id]
+          matter = Zap.find_matter(bundle, custom_field_value_raw, question)
           if matter?
             custom_field_value = matter.id
         else

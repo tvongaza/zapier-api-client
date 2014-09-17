@@ -1,4 +1,6 @@
 typeIsArray = Array.isArray || ( value ) -> return {}.toString.call( value ) is '[object Array]'
+valueExists = (value) -> value not in ["", null, undefined]
+valueMissing = (value) -> value in ["", null, undefined]
 
 Array::unique = ->
   output = {}
