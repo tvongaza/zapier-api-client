@@ -1,5 +1,9 @@
 Zap.create_contact_post_custom_action_fields = (bundle) ->
   Zap.transform_custom_action_fields(bundle)
+Zap.create_person_post_custom_action_fields = (bundle) ->
+  Zap.transform_custom_action_fields(bundle)
+Zap.create_company_post_custom_action_fields = (bundle) ->
+  Zap.transform_custom_action_fields(bundle)
 
 Zap.create_matter_post_custom_action_fields = (bundle) ->
   Zap.transform_custom_action_fields(bundle)
@@ -23,7 +27,7 @@ Zap.transform_custom_action_fields = (bundle) ->
   for object in results.custom_fields
     if object.field_type not in ["time"]
       data = {}
-      data.required = object.displayed
+      data.required = false # don't use object.displayed, we will add required custom fields when they are ready
       # Encode our field type into our data key
       # We will use this later to check if it is a matter or contact
       # custom field type, if so search for the matter or contact
