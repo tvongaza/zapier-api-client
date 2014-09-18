@@ -9,9 +9,7 @@ Zap.create_communication_pre_write = (bundle) ->
   data.date = object.date
   
   if object.sender?
-    sender = Zap.find_user(bundle, object.sender.email, "ignore")
-    sender ?= Zap.find_user(bundle, object.sender.name, "ignore")
-    sender ?= Zap.find_or_create_contact(bundle, object.sender, object.sender.question)
+    sender = Zap.find_user_or_contact_or_create_contact(bundle, object.sender, object.sender.question)
     if sender? && sender.id?
       sender_type = "User"
       if sender.type? && sender.type in ["Person", "Company"]
@@ -19,9 +17,7 @@ Zap.create_communication_pre_write = (bundle) ->
       data.senders = [{"id": sender.id, "type": sender_type}]
 
   if object.receiver?
-    receiver = Zap.find_user(bundle, object.receiver.email, "ignore")
-    receiver ?= Zap.find_user(bundle, object.receiver.name, "ignore")
-    receiver ?= Zap.find_or_create_contact(bundle, object.receiver, object.receiver.question)
+    receiver = Zap.find_user_or_contact_or_create_contact(bundle, object.receiver, object.receiver.question)
     if receiver? && receiver.id?
       receiver_type = "User"
       if receiver.type? && receiver.type in ["Person", "Company"]

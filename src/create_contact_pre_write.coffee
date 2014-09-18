@@ -11,7 +11,11 @@ Zap.create_contact_pre_write = (bundle, contact_type) ->
   
   data = {}
   data.type = contact_type
-  data.name = object.name
+  if valueExists object.first_name and valueExists object.last_name
+    data.first_name = object.first_name
+    data.last_name = object.last_name
+  else
+    data.name = object.name
 
   if contact_type == "Person" && object.company?
     company = Zap.find_or_create_contact(bundle, object.company, object.company.question, "Company")

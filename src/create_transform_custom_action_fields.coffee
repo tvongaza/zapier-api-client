@@ -1,26 +1,30 @@
 Zap.create_contact_post_custom_action_fields = (bundle) ->
-  Zap.transform_custom_action_fields(bundle)
+  Zap.transform_custom_action_fields(bundle, false)
 Zap.create_person_post_custom_action_fields = (bundle) ->
-  Zap.transform_custom_action_fields(bundle)
+  Zap.transform_custom_action_fields(bundle, false)
 Zap.create_company_post_custom_action_fields = (bundle) ->
-  Zap.transform_custom_action_fields(bundle)
+  Zap.transform_custom_action_fields(bundle, false)
 
 Zap.create_matter_post_custom_action_fields = (bundle) ->
-  Zap.transform_custom_action_fields(bundle)
+  Zap.transform_custom_action_fields(bundle, false)
+
+Zap.create_person_and_matter_post_custom_action_fields = (bundle) ->
+  Zap.transform_custom_action_fields(bundle, true)
+
 
 Zap.custom_field_question = (object,choices) ->
   # Ask if how they want to handle missing matters
   question = {}
   question.required = true
   question.key = "custom_field_questions__#{object.id}"
-  question.label = "If #{object.name} (#{object.field_type}) not found?"
+  question.label = "#{object.name} (#{object.field_type}) not found?"
   question.help_text = "What happens when we can't find #{object.field_type}?"
   question.type = "unicode"
   question.default = "ignore"
   question.choices = choices
   question
 
-Zap.transform_custom_action_fields = (bundle) ->
+Zap.transform_custom_action_fields = (bundle, include_parent_type) ->
   results = JSON.parse(bundle.response.content)
   
   array = []
@@ -33,6 +37,9 @@ Zap.transform_custom_action_fields = (bundle) ->
       # custom field type, if so search for the matter or contact
       data.key = "custom_fields__#{object.id}__#{object.field_type}"
       data.label = object.name
+      if include_parent_type
+        data.label = "#{object.parent_type} #{data.label}"
+        
       data.help_text = "Enter a/an #{object.field_type} value"
       
       data.type = switch object.field_type
@@ -60,7 +67,7 @@ Zap.transform_custom_action_fields = (bundle) ->
         question = {}
         question.required = false
         question.key = "custom_field_questions_email__#{object.id}"
-        question.label = "#{object.name} email"
+        question.label = "#{data.label} email"
         question.help_text = "Contact email referenced in #{object.name}. If set we will only search on email. If no contact is found, and option to create is set, we will also set the new contact's email."
         question.type = "unicode"
         array.push question

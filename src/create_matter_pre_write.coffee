@@ -1,3 +1,39 @@
+Zap.create_person_and_matter_pre_write = (bundle) ->
+  request_data = JSON.parse(bundle.request.data)
+  matter = request_data.matter
+  contact = request_data.contact
+  custom_field_values = request_data.custom_fields
+  
+  # We are going to need to map our custom field types correctly, thus we need all our custom fields
+  custom_field_definitions = Zap.make_get_request(bundle, "https://app.goclio.com/api/v2/custom_fields").custom_fields
+  contact_custom_field_ids = (custom_field_definitions.filter (x) -> x.parent_type == "Contact").map (x) -> x.id
+  matter_custom_field_ids = (custom_field_definitions.filter (x) -> x.parent_type == "Matter").map (x) -> x.id
+  
+  # build our person custom field bundle data
+  contact_custom_field_values = {}
+  for custom_field_id in contact_custom_field_ids
+    if custom_field_values[custom_field_id]?
+      contact_custom_field_values[custom_field_id] = custom_field_values[custom_field_id]
+  
+  # build our matter custom field bundle data
+  matter_custom_field_values = {}
+  for custom_field_id in matter_custom_field_ids
+    if custom_field_values[custom_field_id]?
+      matter_custom_field_values[custom_field_id] = custom_field_values[custom_field_id]
+  
+  # Use our existing code to build contact request
+  request_data.contact = contact
+  request_data.custom_fields = contact_custom_field_values
+  bundle.request.data = JSON.stringify(request_data)
+  contact_request = Zap.create_person_pre_write(bundle)
+  # Run our contact request ourselves
+  contact_response = Zap.make_post_request(bundle, "https://app.goclio.com/api/v2/contacts", contact_request.data)
+
+  # Set our client id
+  matter.client_id = contact_response.contact.id
+  bundle.request.data = JSON.stringify({"matter": matter, "custom_fields": matter_custom_field_values})
+  return Zap.create_matter_pre_write(bundle)
+
 Zap.create_matter_pre_write = (bundle) ->
   request_data = JSON.parse(bundle.request.data)
   object = request_data.matter
@@ -8,7 +44,9 @@ Zap.create_matter_pre_write = (bundle) ->
   data.description = object.description
   data.billable = object.billable
   
-  if object.client?
+  if valueExists object.client_id
+    data.client_id = object.client_id
+  else if object.client?
     contact = Zap.find_or_create_contact(bundle, object.client, object.client.question)
     if contact? && contact.id?
       data.client_id = contact.id
