@@ -2,7 +2,11 @@ Zap.new_matter_post_poll = (bundle) ->
   results = JSON.parse(bundle.response.content)
 
   # We need more info about the client, load it up
-  client_ids = (results.matters.map (x) -> x.client.id).unique()
+  client_ids = results.matters.map (x) ->
+    if x.client?
+      x.client.id
+  client_ids = client_ids.unique()
+  client_ids = client_ids.filter (x) -> valueExists x
   clients = Zap.make_get_request(bundle, "https://app.goclio.com/api/v2/contacts?ids=#{client_ids.toString()}").contacts
 
   array = []
@@ -26,11 +30,12 @@ Zap.new_matter_post_poll = (bundle) ->
     data.billable = object.billable
     data.maildrop_address = object.maildrop_address
     data.billing_method = object.billing_method
-    client = (clients.filter (x) -> x.id == object.client.id)[0]
-    data.client = Zap.transform_nested_attributes(object.client)
-    data.client.type = client.type
-    data.client.first_name = client.first_name
-    data.client.last_name = client.last_name
+    client = (clients.filter (x) -> object.client? && x.id == object.client.id)[0]
+    if client?
+      data.client = Zap.transform_nested_attributes(object.client)
+      data.client.type = client.type
+      data.client.first_name = client.first_name
+      data.client.last_name = client.last_name
     data.responsible_attorney = Zap.transform_nested_attributes(object.responsible_attorney)
     data.originating_attorney = Zap.transform_nested_attributes(object.originating_attorney)
     data.practice_area = Zap.transform_nested_attributes(object.practice_area)
