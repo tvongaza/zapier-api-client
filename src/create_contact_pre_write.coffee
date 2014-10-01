@@ -17,7 +17,9 @@ Zap.create_contact_pre_write = (bundle, contact_type) ->
   else
     data.name = object.name
 
-  if contact_type == "Person" && object.company?
+  if valueExists object.company_id
+    data.company_id = object.company_id
+  else if contact_type == "Person" && object.company?
     company = Zap.find_or_create_contact(bundle, object.company, object.company.question, "Company")
     if company? && company.id?
       data.company_id = company.id
@@ -31,6 +33,19 @@ Zap.create_contact_pre_write = (bundle, contact_type) ->
     email_address_type = object.email_address.name
     email_address_type ?= "Work"
     data.email_addresses = [{"name": email_address_type, "address": object.email_address.address}]
+
+  if object.address? && object.address.street? && object.address.city?
+    address_type = object.address.name
+    address_type ?= "Work"
+    data.addresses = [{
+      "name": address_type,
+      "street": object.address.street,
+      "city": object.address.city,
+      "province": object.address.province,
+      "postal_code": object.address.postal_code,
+      "country": object.address.country
+    }]
+
   
   for own custom_field_id, custom_field_data of custom_field_values
     for own custom_field_type, custom_field_value_raw of custom_field_data

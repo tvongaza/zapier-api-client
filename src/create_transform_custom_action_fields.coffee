@@ -8,8 +8,6 @@ Zap.create_company_post_custom_action_fields = (bundle) ->
 Zap.create_matter_post_custom_action_fields = (bundle) ->
   Zap.transform_custom_action_fields(bundle, false)
 
-Zap.create_person_and_matter_post_custom_action_fields = (bundle) ->
-  Zap.transform_custom_action_fields(bundle, true)
 
 
 Zap.custom_field_question = (object,choices) ->
